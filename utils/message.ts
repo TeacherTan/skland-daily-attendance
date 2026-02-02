@@ -41,15 +41,22 @@ export interface MessageCollector {
   collect: (message: string, options?: CollectOptions) => void
 }
 
-function buildBarkUrls(barkTokens: string[], subtitle: string): string[] {
-  const params = new URLSearchParams({
+async function sendBarkNotifications(barkTokens: string[], title: string, subtitle: string, markdown: string) {
+  const body = {
+    device_keys: barkTokens,
+    title,
     subtitle,
+    markdown,
     group: 'Skland Notification',
     level: 'timeSensitive',
     url: 'skland://',
-  })
+  }
 
-  return barkTokens.map(key => `bark://api.day.app/${key}?${params.toString()}`)
+  await fetch('https://api.day.app/push', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
 }
 
 export function createMessageCollector(options: CreateMessageCollectorOptions): MessageCollector {
@@ -131,9 +138,7 @@ export function createMessageCollector(options: CreateMessageCollectorOptions): 
           ? '失败❗'
           : '成功'
 
-      const barkUrls = buildBarkUrls(barkTokens, subtitle)
-      const barkSender = createSender(barkUrls)
-      await barkSender.send('森空岛自动签到', content)
+      await sendBarkNotifications(barkTokens, '森空岛自动签到', subtitle, content)
     }
 
     // Exit with error if any error occurred

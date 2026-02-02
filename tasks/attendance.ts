@@ -82,6 +82,7 @@ async function processAccount(
     .flatMap(i => i.bindingList)
 
   let accountHasError = false
+  let hasNewAttendance = false
   for (const character of characterList) {
     // Initialize game stats if not exists
     if (!stats.charactersByGame.has(character.gameId)) {
@@ -115,6 +116,7 @@ async function processAccount(
       messageCollector.info(result.message)
       if (result.success) {
         gameStats.succeeded++
+        hasNewAttendance = true
       }
       else {
         // Already attended today
@@ -126,7 +128,13 @@ async function processAccount(
   // Save attendance status only if all characters succeeded
   if (!accountHasError) {
     await storage.setItem(attendanceKey, true)
-    stats.accounts.successful++
+    if (hasNewAttendance) {
+      stats.accounts.successful++
+    }
+    else {
+      // All characters were already attended at API level
+      stats.accounts.skipped++
+    }
   }
   else {
     stats.accounts.failed++
