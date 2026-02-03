@@ -245,7 +245,7 @@ Bark的json配置存在几个固定参数：
   "markdown": "[正文部分]",
   "group": "Skland Notification",
   "level": "timeSensitive",
-  "url": "skland://",
+  "url": "skland://"
 }
 ```
 
